@@ -1,0 +1,18 @@
+This is an implementation of the AKS primality test (
+http://en.wikipedia.org/wiki/AKS_algorithm ) for PiCloud.
+
+To run the worker (written in Go) locally:
+
+# Set $GOPATH appropriately...
+go get github.com/akalin/aks-go/aks
+cd aks-picloud-worker
+go build
+
+# Should indicate composite.
+./aks-picloud-worker 2993374621
+
+# Should indicate prime.
+./aks-picloud-worker 2685241991
+
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file.
