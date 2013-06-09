@@ -213,13 +213,7 @@ def main():
     results = cloud.result(jids)
     # TODO(akalin): Accumulate non-witnesses.
     for result in results:
-        if 'isPrime' in result:
-            print '%d is prime' % args.n
-            break
-        elif 'factor' in result:
-            print '%d has factor %d' % (args.n, result['factor'])
-            break
-        elif 'witness' in result:
+        if 'witness' in result:
             print '%d has witness %d' % (args.n, result['witness'])
             break
     else:

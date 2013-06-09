@@ -15,9 +15,7 @@ type jsonResults struct {
 	M       string `json:"M"`
 	Start   string `json:"start"`
 	End     string `json:"end"`
-	Factor  string `json:"factor,omitempty"`
 	Witness string `json:"witness,omitempty"`
-	IsPrime bool   `json:"isPrime,omitempty"`
 }
 
 func getAKSWitness(n, r, M, start, end big.Int, jobs int) jsonResults {
@@ -28,26 +26,10 @@ func getAKSWitness(n, r, M, start, end big.Int, jobs int) jsonResults {
 	results.Start = start.String()
 	results.End = end.String()
 
-	factor := aks.GetFirstFactorBelow(&n, &M)
-	if factor != nil {
-		results.Factor = factor.String()
-		return results
-	}
-
-	// M^2 > N iff M > floor(sqrt(N)).
-	var mSq big.Int
-	mSq.Mul(&M, &M)
-	if mSq.Cmp(&n) > 0 {
-		results.IsPrime = true
-		return results
-	}
-
 	logger := log.New(os.Stderr, "", 0)
 	a := aks.GetAKSWitness(&n, &r, &start, &end, jobs, logger)
 	if a != nil {
 		results.Witness = a.String()
-	} else if start.Cmp(big.NewInt(1)) <= 0 && end.Cmp(&M) >= 0 {
-		results.IsPrime = true
 	}
 	return results
 }
