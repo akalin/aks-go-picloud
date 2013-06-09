@@ -173,6 +173,8 @@ def main():
     parser = argparse.ArgumentParser(
         description='Test primality via the AKS algorithm.')
     parser.add_argument('-j', type=int, help='the number of jobs to use')
+    parser.add_argument('--watch',
+                        type=int, help='the first jid of a range to watch')
     parser.add_argument('n', type=int, help='the number to test')
     args = parser.parse_args()
 
@@ -203,14 +205,18 @@ def main():
         return find_aks_witness(args.n, start, start + step)
 
     start_range = xrange(1, M, step)
-    print 'calling into PiCloud with %d jobs...' % len(start_range)
-
-    jids = cloud.map(find_aks_witness_for_n, start_range,
-                     _env='aks', _type='f2', _cores=4,
-                     _label='find_aks_witness(%d)' % args.n)
+    if args.watch:
+        jids = xrange(args.watch, args.watch + len(start_range))
+        print 'watching %d jobs starting from %d...' % (len(jids), args.watch)
+    else:
+        print 'calling into PiCloud with %d jobs...' % len(start_range)
+        jids = cloud.map(find_aks_witness_for_n, start_range,
+                         _env='aks', _type='f2', _cores=4,
+                         _label='find_aks_witness(%d)' % args.n)
 
     remaining_jobs = len(jids)
-    print 'waiting for results from %d jobs...' % remaining_jobs
+    print ('waiting for results from %d jobs starting from %d...' %
+           (remaining_jobs, jids[0]))
     results = cloud.iresult(jids)
     non_witnesses = set()
     for result in results:
