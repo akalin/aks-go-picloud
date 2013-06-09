@@ -14,5 +14,13 @@ go build
 # Should indicate prime.
 ./aks-picloud-worker 2685241991
 
+To run on PiCloud (assuming everything is set up correctly):
+
+# Should indicate composite.
+python aks-picloud.py 2993374621
+
+# Should indicate prime.
+python aks-picloud.py 2685241991
+
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file.
