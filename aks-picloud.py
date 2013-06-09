@@ -4,6 +4,7 @@ import fractions
 import json
 import math
 import subprocess
+import sys
 
 
 def calculate_euler_phi_prime_power(p, k):
@@ -175,6 +176,10 @@ def main():
     parser.add_argument('n', type=int, help='the number to test')
     args = parser.parse_args()
 
+    if args.n < 2:
+        sys.stderr.write("n must be >= 2\n")
+        sys.exit(-1)
+
     r = calculate_aks_modulus(args.n)
     M = calculate_aks_upper_bound(args.n, r)
 
@@ -182,6 +187,16 @@ def main():
         args.j = int(math.sqrt(M))
 
     print 'n = %d, r = %d, M = %d' % (args.n, r, M)
+
+    for (q, e) in trial_divide(args.n, M - 1):
+        if q < args.n:
+            print '%d has factor %d' % (args.n, q)
+            return
+
+    # M^2 > N iff M > floor(sqrt(N)).
+    if M**2 > args.n:
+        print '%d is prime' % args.n
+        return
 
     step = M // args.j
     def find_aks_witness_for_n(start):
