@@ -32,9 +32,18 @@ def main():
 
     print 'calling into PiCloud...'
     jid = cloud.call(get_aks_witness, args.n,
-                     _env='aks', _label='get_aks_witness(%d)' % args.n)
+                     _env='aks', _type='f2', _cores=4,
+                     _label='get_aks_witness(%d)' % args.n)
     print 'waiting for results...'
-    print cloud.result(jid)
+    result = cloud.result(jid)
+    if 'isPrime' in result:
+        print '%d is prime' % args.n
+    elif 'factor' in result:
+        print '%d has factor %d' % (args.n, result['factor'])
+    elif 'witness' in result:
+        print '%d has witness %d' % (args.n, result['witness'])
+    else:
+        print '%d is prime' % args.n
 
 
 if __name__ == '__main__':
