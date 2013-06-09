@@ -220,6 +220,8 @@ def main():
     results = cloud.iresult(jids)
     non_witnesses = set()
     for result in results:
+        if result['n'] != args.n:
+            raise Exception('n mismatch: %d != %d' % (result['n'], args.n))
         remaining_jobs -= 1
         if 'witness' in result:
             print '%d has witness %d' % (args.n, result['witness'])
