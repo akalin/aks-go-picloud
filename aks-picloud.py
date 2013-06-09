@@ -209,15 +209,28 @@ def main():
                      _env='aks', _type='f2', _cores=4,
                      _label='find_aks_witness(%d)' % args.n)
 
-    print 'waiting for results from %d jobs...' % len(jids)
-    results = cloud.result(jids)
-    # TODO(akalin): Accumulate non-witnesses.
+    remaining_jobs = len(jids)
+    print 'waiting for results from %d jobs...' % remaining_jobs
+    results = cloud.iresult(jids)
+    non_witnesses = set()
     for result in results:
+        remaining_jobs -= 1
         if 'witness' in result:
             print '%d has witness %d' % (args.n, result['witness'])
+            # TODO(akalin): Kill remaining jobs.
             break
+        non_witnesses = (
+            non_witnesses.union(xrange(result['start'], result['end'])))
+        print (
+            '%d/%d non-witnesses found; still waiting for %d jobs...' %
+            (len(non_witnesses), M - 1, remaining_jobs))
     else:
-        print '%d is prime' % args.n
+        whole_range = xrange(1, M)
+        if non_witnesses.issuperset(whole_range):
+            print '%d is prime' % args.n
+        else:
+            missing_non_witnesses = set(whole_range).difference(non_witnesses)
+            print 'still missing non-witnesses: %s' % missing_non_witnesses
 
 
 if __name__ == '__main__':
