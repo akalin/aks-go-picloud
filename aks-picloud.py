@@ -147,7 +147,7 @@ def calculate_aks_upper_bound(n, r):
     return int(math.sqrt(calculate_euler_phi(r))) * ceil_lg_n + 1
 
 
-def find_aks_witness(n, start, end):
+def find_aks_witness(n, start, end, jobs):
     '''Shell out to aks-picloud-worker to test primality and return
     the result as a dictionary.
     '''
@@ -155,6 +155,7 @@ def find_aks_witness(n, start, end):
         ['/home/picloud/src/aks-picloud/aks-picloud-worker/aks-picloud-worker',
          '-start=%d' % start,
          '-end=%d' % end,
+         '-j=%d' % jobs,
          str(n)])
     result = json.loads(result_str)
     result['n'] = int(result['n'])
@@ -200,9 +201,10 @@ def main():
         print '%d is prime' % args.n
         return
 
+    num_cores = 4
     step = M // args.j
     def find_aks_witness_for_n(start):
-        return find_aks_witness(args.n, start, start + step)
+        return find_aks_witness(args.n, start, start + step, num_cores)
 
     start_range = xrange(1, M, step)
     if args.watch:
@@ -211,7 +213,7 @@ def main():
     else:
         print 'calling into PiCloud with %d jobs...' % len(start_range)
         jids = cloud.map(find_aks_witness_for_n, start_range,
-                         _env='aks', _type='f2', _cores=4,
+                         _env='aks', _type='f2', _cores=num_cores,
                          _label='find_aks_witness(%d)' % args.n)
 
     remaining_jobs = len(jids)
