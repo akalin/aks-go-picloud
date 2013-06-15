@@ -174,6 +174,8 @@ def main():
     parser = argparse.ArgumentParser(
         description='Test primality via the AKS algorithm.')
     parser.add_argument('-j', type=int, help='the number of jobs to use')
+    parser.add_argument('-c', type=int,
+                        help='the number of cores per job to use')
     parser.add_argument('--watch',
                         type=int, help='the first jid of a range to watch')
     parser.add_argument('n', type=int, help='the number to test')
@@ -189,6 +191,9 @@ def main():
     if not args.j:
         args.j = int(math.sqrt(M))
 
+    if args.c < 1:
+        args.c = 4
+
     print 'n = %d, r = %d, M = %d' % (args.n, r, M)
 
     for (q, e) in trial_divide(args.n, M - 1):
@@ -201,19 +206,19 @@ def main():
         print '%d is prime' % args.n
         return
 
-    num_cores = 4
     step = M // args.j
     def find_aks_witness_for_n(start):
-        return find_aks_witness(args.n, start, start + step, num_cores)
+        return find_aks_witness(args.n, start, start + step, args.c)
 
     start_range = xrange(1, M, step)
     if args.watch:
         jids = xrange(args.watch, args.watch + len(start_range))
         print 'watching %d jobs starting from %d...' % (len(jids), args.watch)
     else:
-        print 'calling into PiCloud with %d jobs...' % len(start_range)
+        print 'calling into PiCloud with %d jobs and %d cores...' % (
+            len(start_range), args.c)
         jids = cloud.map(find_aks_witness_for_n, start_range,
-                         _env='aks', _type='f2', _cores=num_cores,
+                         _env='aks', _type='f2', _cores=args.c,
                          _label='find_aks_witness(%d)' % args.n)
 
     remaining_jobs = len(jids)
